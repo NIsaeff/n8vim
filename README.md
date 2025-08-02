@@ -1,4 +1,4 @@
-# kickstart.nvim
+# n8vim (recently forked from kickstart.nvim)
 
 ## Introduction
 
