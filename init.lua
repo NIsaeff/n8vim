@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -219,6 +219,86 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Enhanced markdown file settings
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'markdown',
+  callback = function()
+    -- Obsidian.nvim UI features
+    vim.opt_local.conceallevel = 2
+    
+    -- Better text editing
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+    vim.opt_local.breakindent = true
+    vim.opt_local.showbreak = '↪ '
+    
+    -- Spell checking
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = 'en_us'
+    
+    -- Better formatting
+    vim.opt_local.textwidth = 80
+    vim.opt_local.formatoptions:append('t') -- Auto-wrap text using textwidth
+    vim.opt_local.formatoptions:append('c') -- Auto-wrap comments using textwidth
+    vim.opt_local.formatoptions:append('r') -- Continue comments when pressing Enter
+    vim.opt_local.formatoptions:append('o') -- Continue comments when using o/O
+    vim.opt_local.formatoptions:append('q') -- Allow formatting of comments with gq
+    vim.opt_local.formatoptions:append('l') -- Don't break existing long lines
+    vim.opt_local.formatoptions:append('j') -- Remove comment leader when joining lines
+    
+    -- Markdown-specific keymaps
+    local opts = { buffer = true, silent = true }
+    
+    -- Text formatting shortcuts
+    vim.keymap.set('n', '<leader>mb', 'viwS*gvS*', vim.tbl_extend('force', opts, { desc = '[M]arkdown [B]old' }))
+    vim.keymap.set('v', '<leader>mb', 'S*gvS*', vim.tbl_extend('force', opts, { desc = '[M]arkdown [B]old' }))
+    vim.keymap.set('n', '<leader>mi', 'viwS_', vim.tbl_extend('force', opts, { desc = '[M]arkdown [I]talic' }))
+    vim.keymap.set('v', '<leader>mi', 'S_', vim.tbl_extend('force', opts, { desc = '[M]arkdown [I]talic' }))
+    vim.keymap.set('n', '<leader>mc', 'viwS`', vim.tbl_extend('force', opts, { desc = '[M]arkdown [C]ode' }))
+    vim.keymap.set('v', '<leader>mc', 'S`', vim.tbl_extend('force', opts, { desc = '[M]arkdown [C]ode' }))
+    
+    -- Enhanced code block creation
+    vim.keymap.set('n', '<leader>mcc', function()
+      local lang = vim.fn.input('Language: ')
+      local lines = {'```' .. lang, '', '```'}
+      vim.api.nvim_put(lines, 'l', true, true)
+      vim.api.nvim_feedkeys('kA', 'n', false)
+    end, vim.tbl_extend('force', opts, { desc = '[M]arkdown [C]ode [C]block' }))
+    
+    -- Link creation
+    vim.keymap.set('v', '<leader>ml', function()
+      local url = vim.fn.input('URL: ')
+      if url ~= '' then
+        vim.cmd("normal! c[" .. vim.fn.getreg('"') .. "](" .. url .. ")")
+      end
+    end, vim.tbl_extend('force', opts, { desc = '[M]arkdown [L]ink' }))
+    
+    -- Quick list items
+    vim.keymap.set('n', '<leader>m-', 'I- <Esc>', vim.tbl_extend('force', opts, { desc = 'Add bullet point' }))
+    vim.keymap.set('n', '<leader>m1', 'I1. <Esc>', vim.tbl_extend('force', opts, { desc = 'Add numbered list' }))
+    vim.keymap.set('n', '<leader>mx', 'I- [ ] <Esc>', vim.tbl_extend('force', opts, { desc = 'Add checkbox' }))
+    
+    -- Header shortcuts
+    vim.keymap.set('n', '<leader>m1h', 'I# <Esc>', vim.tbl_extend('force', opts, { desc = 'H1 header' }))
+    vim.keymap.set('n', '<leader>m2h', 'I## <Esc>', vim.tbl_extend('force', opts, { desc = 'H2 header' }))
+    vim.keymap.set('n', '<leader>m3h', 'I### <Esc>', vim.tbl_extend('force', opts, { desc = 'H3 header' }))
+    vim.keymap.set('n', '<leader>m4h', 'I#### <Esc>', vim.tbl_extend('force', opts, { desc = 'H4 header' }))
+    
+    -- Enhanced navigation
+    vim.keymap.set('n', '<leader>mth', '/^#\\+<CR>', vim.tbl_extend('force', opts, { desc = 'Go to [T]op [H]eader' }))
+    vim.keymap.set('n', '<leader>mnh', '/^#\\+.*<CR>', vim.tbl_extend('force', opts, { desc = 'Go to [N]ext [H]eader' }))
+    vim.keymap.set('n', '<leader>mph', '?^#\\+.*<CR>', vim.tbl_extend('force', opts, { desc = 'Go to [P]rev [H]eader' }))
+    
+    -- Callout shortcuts (for render-markdown)
+    vim.keymap.set('n', '<leader>mn', 'I> [!NOTE]<CR>> <Esc>', vim.tbl_extend('force', opts, { desc = 'Add [N]ote callout' }))
+    vim.keymap.set('n', '<leader>mt', 'I> [!TIP]<CR>> <Esc>', vim.tbl_extend('force', opts, { desc = 'Add [T]ip callout' }))
+    vim.keymap.set('n', '<leader>mw', 'I> [!WARNING]<CR>> <Esc>', vim.tbl_extend('force', opts, { desc = 'Add [W]arning callout' }))
+    
+    -- Toggle render-markdown
+    vim.keymap.set('n', '<leader>mr', '<cmd>RenderMarkdown toggle<cr>', vim.tbl_extend('force', opts, { desc = 'Toggle [M]arkdown [R]endering' }))
+  end,
+})
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -249,6 +329,50 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
 
+  -- Color preview for hex codes
+  {
+    'norcalli/nvim-colorizer.lua',
+    config = function()
+      require('colorizer').setup({
+        '*', -- Highlight all files
+        css = { rgb_fn = true }, -- Enable parsing rgb(...) functions in css files
+        html = { names = false }, -- Disable parsing "names" like Blue or Gray
+        markdown = { names = false },
+      })
+    end,
+  },
+
+  -- Tmux & split navigation
+  {
+    'christoomey/vim-tmux-navigator',
+    cmd = {
+      'TmuxNavigateLeft',
+      'TmuxNavigateDown',
+      'TmuxNavigateUp',
+      'TmuxNavigateRight',
+      'TmuxNavigatePrevious',
+    },
+    keys = {
+      { '<c-h>', '<cmd><C-U>TmuxNavigateLeft<cr>' },
+      { '<c-j>', '<cmd><C-U>TmuxNavigateDown<cr>' },
+      { '<c-k>', '<cmd><C-U>TmuxNavigateUp<cr>' },
+      { '<c-l>', '<cmd><C-U>TmuxNavigateRight<cr>' },
+      { '<c-\\>', '<cmd><C-U>TmuxNavigatePrevious<cr>' },
+    },
+  },
+  --[[
+  {
+    'anthropics/claude-code.nvim',
+    config = function()
+      require('claude-code').setup {
+        api_key = os.getenv 'ANTHROPIC_API_KEY',
+        send_on_save = false, -- only send when requested
+        root_dir_strategy = 'lsp', -- restrict to the project folder
+        auto_suggestions = false, -- manual only for privacy
+      }
+    end,
+  },
+  --]]
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
@@ -347,6 +471,7 @@ require('lazy').setup({
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>m', group = '[M]arkdown', mode = { 'n', 'v' } },
       },
     },
   },
@@ -671,19 +796,19 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
+        -- C/C++ Language Server
+        clangd = {
+          cmd = { 'clangd', '--background-index', '--clang-tidy', '--header-insertion=iwyu' },
+          filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
+          root_dir = require('lspconfig.util').root_pattern('compile_commands.json', 'compile_flags.txt', '.git'),
+        },
+        
+        -- Java Language Server (requires jdtls installation via Mason)
+        jdtls = {},
+        
+        -- Python (if you want to keep it)
         -- pyright = {},
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
-        --
-
+        
         lua_ls = {
           -- cmd = { ... },
           -- filetypes = { ... },
@@ -716,6 +841,10 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'clangd', -- C/C++ language server
+        'jdtls', -- Java language server
+        'clang-format', -- C/C++ formatter
+        'prettier', -- Markdown/HTML/CSS/JS formatter
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -756,7 +885,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = true, cpp = true } -- Keep C/C++ manual for systems programming
         if disable_filetypes[vim.bo[bufnr].filetype] then
           return nil
         else
@@ -768,6 +897,10 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        markdown = { 'prettier' },
+        c = { 'clang-format' },
+        cpp = { 'clang-format' },
+        java = { 'google-java-format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -944,7 +1077,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'cpp', 'java', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -979,6 +1112,239 @@ require('lazy').setup({
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+
+  -- Obsidian.nvim for note-taking
+  {
+    'epwalsh/obsidian.nvim',
+    version = '*', -- recommended, use latest release instead of latest commit
+    lazy = true,
+    ft = 'markdown',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    opts = {
+      workspaces = {
+        {
+          name = 'documents',
+          path = '~/Documents',
+        },
+      },
+      completion = {
+        nvim_cmp = false,
+        min_chars = 2,
+      },
+      mappings = {
+        -- Overrides the 'gf' mapping to work on markdown/wiki links within your vault.
+        ['gf'] = {
+          action = function()
+            return require('obsidian').util.gf_passthrough()
+          end,
+          opts = { noremap = false, expr = true, buffer = true },
+        },
+        -- Toggle check-boxes.
+        ['<leader>ch'] = {
+          action = function()
+            return require('obsidian').util.toggle_checkbox()
+          end,
+          opts = { buffer = true },
+        },
+      },
+      daily_notes = {
+        folder = 'daily',
+        date_format = '%Y-%m-%d',
+      },
+      templates = {
+        subdir = 'templates',
+        date_format = '%Y-%m-%d',
+        time_format = '%H:%M',
+      },
+      ui = {
+        enable = true,
+      },
+    },
+  },
+
+  -- Markdown preview
+  {
+    'iamcco/markdown-preview.nvim',
+    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+    build = 'cd app && npm install',
+    init = function()
+      vim.g.mkdp_filetypes = { 'markdown' }
+    end,
+    ft = { 'markdown' },
+    keys = {
+      { '<leader>mp', '<cmd>MarkdownPreviewToggle<cr>', desc = '[M]arkdown [P]review' },
+    },
+  },
+
+  -- Better markdown table editing
+  {
+    'dhruvasagar/vim-table-mode',
+    ft = 'markdown',
+    keys = {
+      { '<leader>tm', '<cmd>TableModeToggle<cr>', desc = '[T]able [M]ode toggle' },
+    },
+    config = function()
+      vim.g.table_mode_corner = '|'
+      vim.g.table_mode_corner_corner = '+'
+      vim.g.table_mode_header_fillchar = '='
+    end,
+  },
+
+  -- Enhanced markdown editing
+  {
+    'MeanderingProgrammer/markdown.nvim',
+    name = 'render-markdown',
+    dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' },
+    ft = 'markdown',
+    config = function()
+      require('render-markdown').setup({
+        heading = {
+          -- Turn on / off heading icon & background rendering
+          enabled = true,
+          -- Turn on / off any sign column related rendering
+          sign = true,
+          -- Replaces '#+' of atx headings
+          icons = { '󰲡 ', '󰲣 ', '󰲥 ', '󰲧 ', '󰲩 ', '󰲫 ' },
+          -- Added to the sign column if enabled
+          signs = { '󰫎 ' },
+          -- Width of the heading background
+          width = 'full',
+          -- Amount of padding to add to the left of headings
+          left_pad = 0,
+          -- Amount of padding to add to the right of headings
+          right_pad = 0,
+          -- Minimum width to use for headings
+          min_width = 0,
+          -- Determines if a border is added above and below headings
+          border = false,
+          -- Highlight the start of the border if enabled
+          border_prefix = false,
+          -- Used above heading for border
+          above = '▄',
+          -- Used below heading for border
+          below = '▀',
+          -- The 'level' is used to index into the array using a cycle
+          backgrounds = {
+            'RenderMarkdownH1Bg',
+            'RenderMarkdownH2Bg',
+            'RenderMarkdownH3Bg',
+            'RenderMarkdownH4Bg',
+            'RenderMarkdownH5Bg',
+            'RenderMarkdownH6Bg',
+          },
+          -- The 'level' is used to index into the array using a cycle
+          foregrounds = {
+            'RenderMarkdownH1',
+            'RenderMarkdownH2',
+            'RenderMarkdownH3',
+            'RenderMarkdownH4',
+            'RenderMarkdownH5',
+            'RenderMarkdownH6',
+          },
+        },
+        code = {
+          -- Turn on / off code block & inline code rendering
+          enabled = true,
+          -- Turn on / off any sign column related rendering
+          sign = true,
+          -- Determines how code blocks & inline code are rendered
+          style = 'full',
+          -- Amount of padding to add around the code block
+          left_pad = 0,
+          right_pad = 0,
+          -- Width of the code block background
+          width = 'full',
+          -- Determins how the top / bottom of code block are rendered
+          border = 'thin',
+          -- Used above code blocks for thin border
+          above = '▄',
+          -- Used below code blocks for thin border
+          below = '▀',
+          -- Highlight the start of the border if enabled
+          highlight = 'RenderMarkdownCodeInline',
+        },
+        bullet = {
+          -- Turn on / off list bullet rendering
+          enabled = true,
+          -- Replaces '-', '+', and '*' of unordered lists
+          icons = { '●', '○', '◆', '◇' },
+          -- Padding to add to the left of bullet
+          left_pad = 0,
+          -- Padding to add to the right of bullet
+          right_pad = 0,
+          -- Highlight for the bullet icon
+          highlight = 'RenderMarkdownBullet',
+        },
+        -- Checkboxes are a special instance of a 'list_item' that start with a 'shortcut_link'
+        -- There are two special states for 'todo' checkboxes: 'todo' and 'done'
+        checkbox = {
+          -- Turn on / off checkbox state rendering
+          enabled = true,
+          unchecked = {
+            -- Replaces '[ ]' of unchecked checkboxes
+            icon = '󰄱 ',
+            -- Highlight for the unchecked icon
+            highlight = 'RenderMarkdownUnchecked',
+          },
+          checked = {
+            -- Replaces '[x]' of checked checkboxes
+            icon = '󰱒 ',
+            -- Highligh for the checked icon
+            highlight = 'RenderMarkdownChecked',
+          },
+          -- Define custom checkbox states, more involved as they are not part of the markdown grammar
+          custom = {
+            todo = { raw = '[-]', rendered = '󰥔 ', highlight = 'RenderMarkdownTodo' },
+          },
+        },
+        pipe_table = {
+          -- Turn on / off pipe table rendering
+          enabled = true,
+          -- Determines how the table as a whole is rendered
+          style = 'full',
+          -- Determines how individual cells of a table are rendered
+          cell = 'trimmed',
+          -- Character to use for table border
+          border = {
+            '┌', '┬', '┐',
+            '├', '┼', '┤',
+            '└', '┴', '┘',
+            '│', '─',
+          },
+          -- Highlight for table heading, delimiter, and the line above
+          head = 'RenderMarkdownTableHead',
+          -- Highlight for everything else, main table rows and the line below
+          row = 'RenderMarkdownTableRow',
+          -- Highlight for table filler
+          filler = 'RenderMarkdownTableFill',
+        },
+        -- Callouts are a special instance of a 'block_quote' that start with a 'shortcut_link'
+        callout = {
+          note = { raw = '[!NOTE]', rendered = '󰋽 Note', highlight = 'RenderMarkdownInfo' },
+          tip = { raw = '[!TIP]', rendered = '󰌶 Tip', highlight = 'RenderMarkdownSuccess' },
+          important = { raw = '[!IMPORTANT]', rendered = '󰅾 Important', highlight = 'RenderMarkdownHint' },
+          warning = { raw = '[!WARNING]', rendered = '󰀪 Warning', highlight = 'RenderMarkdownWarn' },
+          caution = { raw = '[!CAUTION]', rendered = '󰳦 Caution', highlight = 'RenderMarkdownError' },
+        },
+        link = {
+          -- Turn on / off inline link icon rendering
+          enabled = true,
+          -- Inlined with 'image' elements
+          image = '󰥶 ',
+          -- Inlined with 'inline_link' elements
+          hyperlink = '󰌹 ',
+          -- Applies to the inlined icon
+          highlight = 'RenderMarkdownLink',
+        },
+        sign = {
+          -- Turn on / off sign rendering
+          enabled = true,
+        },
+      })
+    end,
+  },
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
