@@ -498,6 +498,8 @@ require('lazy').setup({
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { '<leader>m', group = '[M]arkdown', mode = { 'n', 'v' } },
+        { '<leader>d', group = '[D]ebug' },
+        { '<leader>b', group = '[B]uild' },
       },
     },
   },
@@ -1376,7 +1378,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -1402,6 +1404,32 @@ require('lazy').setup({
       lazy = '💤 ',
     },
   },
+})
+
+-- Set tab/indent settings for all files
+vim.opt.tabstop = 2        -- Tab character width
+vim.opt.shiftwidth = 2     -- Indent width 
+vim.opt.softtabstop = 2    -- Tab key width
+vim.opt.expandtab = true   -- Use spaces instead of tabs
+vim.opt.autoindent = true  -- Auto-indent new lines
+vim.opt.smartindent = true -- Smart indenting
+
+-- Fix excessive indentation issues
+vim.opt.cindent = false    -- Disable C-style indenting
+vim.opt.cinoptions = ""    -- Clear C indent options
+vim.opt.cinkeys = ""       -- Clear C indent keys
+
+-- Language-specific indent settings
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'python', 'lua', 'javascript', 'typescript', 'java', 'c', 'cpp' },
+  callback = function()
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.expandtab = true
+    vim.opt_local.cindent = false
+    vim.opt_local.smartindent = true
+  end,
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
