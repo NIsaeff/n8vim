@@ -314,6 +314,8 @@ return {
             vim.cmd('write')  -- Save first
             vim.cmd('vsplit')
             vim.cmd('terminal make run FILE=' .. filename)
+            vim.cmd('startinsert')  -- Enter terminal
+            vim.cmd('stopinsert')  -- Exit insert mode immediately
             vim.cmd('wincmd p')  -- Return focus to previous window
           end, vim.tbl_extend('force', opts, { desc = 'Build and run current file' }))
           
@@ -323,6 +325,7 @@ return {
             vim.cmd('write')
             vim.cmd('split')
             vim.cmd('terminal make run FILE=' .. filename)
+            vim.cmd('stopinsert')  -- Don't enter insert mode in terminal
             vim.cmd('wincmd p')  -- Return focus to previous window
           end, vim.tbl_extend('force', opts, { desc = '[R]un: Build and [R]un' }))
         end,
