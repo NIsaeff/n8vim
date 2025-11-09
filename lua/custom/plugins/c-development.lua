@@ -307,6 +307,20 @@ return {
             local word = vim.fn.expand('<cword>')
             vim.cmd('Man 2 ' .. word)
           end, vim.tbl_extend('force', opts, { desc = 'Man section [2] (syscalls)' }))
+          
+          -- Build and run current file (F5 like IDEs)
+          vim.keymap.set('n', '<F5>', function()
+            local filename = vim.fn.expand('%:t:r')  -- Get filename without extension
+            vim.cmd('write')  -- Save first
+            vim.cmd('vsplit | terminal make run FILE=' .. filename)
+          end, vim.tbl_extend('force', opts, { desc = 'Build and run current file' }))
+          
+          -- Build and run in horizontal split
+          vim.keymap.set('n', '<leader>rr', function()
+            local filename = vim.fn.expand('%:t:r')
+            vim.cmd('write')
+            vim.cmd('split | terminal make run FILE=' .. filename)
+          end, vim.tbl_extend('force', opts, { desc = '[R]un: Build and [R]un' }))
         end,
       })
     end,
