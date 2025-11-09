@@ -312,14 +312,18 @@ return {
           vim.keymap.set('n', '<F5>', function()
             local filename = vim.fn.expand('%:t:r')  -- Get filename without extension
             vim.cmd('write')  -- Save first
-            vim.cmd('vsplit | terminal make run FILE=' .. filename)
+            vim.cmd('vsplit')
+            vim.cmd('terminal make run FILE=' .. filename)
+            vim.cmd('wincmd p')  -- Return focus to previous window
           end, vim.tbl_extend('force', opts, { desc = 'Build and run current file' }))
           
           -- Build and run in horizontal split
           vim.keymap.set('n', '<leader>rr', function()
             local filename = vim.fn.expand('%:t:r')
             vim.cmd('write')
-            vim.cmd('split | terminal make run FILE=' .. filename)
+            vim.cmd('split')
+            vim.cmd('terminal make run FILE=' .. filename)
+            vim.cmd('wincmd p')  -- Return focus to previous window
           end, vim.tbl_extend('force', opts, { desc = '[R]un: Build and [R]un' }))
         end,
       })
